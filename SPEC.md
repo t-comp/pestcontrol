@@ -28,6 +28,8 @@ Deferred (not in v1, do not build unless asked):
 - Choose-your-own-puzzle browsing by category (v1 gives random puzzles)
 - Real bugs from repos such as QuixBugs and BugsInPy (pending license checks, see section 8)
 - The "make this code more efficient" track (see section 11)
+- Timed mode (a time limit per round, or points for speed)
+- Advanced scoring: difficulty multiplier (Easy 1.0, Medium 1.5, Hard 2.0), streak bonus (+10% per level, capped at +50%), and the order they apply in
 
 ## 3. Core loop: one round
 
@@ -42,19 +44,19 @@ Panels:
 
 Combo bonus: +100 if the player completes find, name, and fix correctly in the same round.
 
-Maximum base score per round before multipliers and hints: 650 (100 + 50 + 400 + 100 combo).
+Maximum score per round before hints: 650 (100 + 50 + 400 + 100 combo).
 
-Scoring rules:
-- Difficulty multiplier: Easy 1.0, Medium 1.5. (Hard 2.0 is reserved for later.)
-- Streak: consecutive rounds where the find-the-line click was correct on the first click. Streak bonus: +10% per streak level, capped at +50%.
-- Accuracy: percentage of rounds where the first click was correct.
+Scoring rules (v1, basic):
+- Score per round is the sum of the panel points plus the combo bonus, minus hint costs. Easy and Medium score the same.
 - Hints: 2 per puzzle. Hint 1 costs 25 points, hint 2 costs 50 points, deducted from that puzzle's score, never below zero.
-- Order in which hints, multiplier, and streak bonus are applied: see Open questions.
+- Streak and accuracy are shown as stats but do not change the score. Streak: consecutive rounds where the find-the-line click was correct on the first click. Accuracy: percentage of rounds where the first click was correct.
 
 Fix panel details:
 - Unlimited test runs.
 - 2 example tests are visible. The rest are hidden. After a run, the player sees only "hidden tests: X of Y passed", with no failure details.
 - Each test run has a 10 second time limit. If it runs longer, it is stopped and the player sees "timed out".
+
+Round timer: show a stopwatch of elapsed time for each round. There is no time limit and time does not affect the score. Save the completion time with the player's progress in localStorage. In v1 this data stays in the player's browser.
 
 How puzzles are served in v1:
 - The player picks a tier and gets a random puzzle they have not seen (tracked in the browser).
@@ -162,7 +164,7 @@ Known trade-off: tests run in the browser, so a determined player can read the h
 - Java: needs a server-side sandbox.
 - Hard tier and multi-bug puzzles: show the player how many bugs exist, award find and bug-type points per bug, require all tests to pass for the fix, allow bugs plus one spare click, then reveal the rest with no points.
 - Larger single-file programs, then multi-file codebases, with an overview of the program's purpose.
-- Browse and choose puzzles by category and difficulty, picoCTF-style, and points by difficulty.
+- Browse and choose puzzles by category and difficulty and points by difficulty.
 - User-submitted bugs and a forum.
 - Real bugs from repos, after license checks.
 
@@ -172,12 +174,41 @@ A separate track where the player makes working code more efficient. The `track`
 
 ## 12. Open questions
 
-1. Order of scoring adjustments. Suggested: apply hint deductions first, then the difficulty multiplier, then the streak bonus.
+1. Scoring order: deferred with advanced scoring (section 2).
 2. Can the bug-type dropdown be retried? Suggested: one attempt.
-3. Is there a timer or timed mode? Not discussed. None in v1 unless the owner adds it.
+3. Timer: decided. Untimed stopwatch in v1 (section 3). Timed mode deferred.
 4. Is the name "pestcontrol" available, including a domain? Not checked.
 5. Read the live GeeksforGeeks terms and confirm whether automated collection is allowed.
 6. Verify licenses for HumanEval, MBPP, and Exercism directly, and check QuixBugs and each BugsInPy project.
 7. Define the `ai_style` bug types. Plan: read the taxonomy paper on bugs in LLM-generated code (arXiv 2407.06153) and propose a list for approval.
 8. How many puzzles per subtype in the first 40.
 9. Confirm hosting after checking free-tier limits.
+
+## 13. Build order (v1)
+
+Build one feature at a time. Each feature ends with something that runs and is checked before the next starts. The order puts the riskiest part (running Python in the browser with Pyodide) early, so problems show up before the other panels depend on it.
+
+Foundation:
+1. Puzzle data: puzzle type (section 6), data-access layer, one dev puzzle in JSON.
+2. Puzzle page: show intent and buggy code in the Monaco editor.
+3. Test runner for the app, and project commands written into CLAUDE.md.
+
+Core round (section 3):
+4. Run Python: Pyodide in a Web Worker, 10 second limit per test run.
+5. Fix it panel: run visible and hidden tests, show "hidden tests: X of Y passed". First playable version.
+6. Find the line panel.
+7. Name the bug panel (needs open question 2).
+8. Explain it panel.
+9. Scoring (basic, section 3): panel points, combo, hint costs, streak and accuracy stats.
+
+Game flow:
+10. Progress in localStorage, random unseen puzzle per tier, tier-complete message.
+
+Content and launch:
+11. Verification script (section 7). Needs Python installed locally.
+12. Source line after each round and a credits page (section 8).
+13. Public build filter: only verified puzzles that are cleared, or conditional with conditions met.
+14. Puzzle batches up to 40 (section 2). Needs a license decision for original puzzles.
+15. Deploy (needs open question 9).
+
+This order was proposed by Claude and chosen by the owner on 2026-11-02. It can change. Update this section when it does.
