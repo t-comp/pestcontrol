@@ -54,3 +54,6 @@ export interface Puzzle {
   ai_style: boolean;
   verified: boolean;
 }
+
+// The only puzzle fields the puzzle page may render or send to the browser.
+export type PuzzleView = Pick<Puzzle, "title" | "difficulty" | "intent" | "code">;
