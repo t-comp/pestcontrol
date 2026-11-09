@@ -1,0 +1,34 @@
+{
+  "id": "py-0001",
+  "track": "find_bug",
+  "language": "python",
+  "difficulty": "easy",
+  "category": "logic",
+  "subtype": "off_by_one",
+  "title": "Sum to n",
+  "intent": "Return the sum of all integers from 1 to n. Example: sum_to(4) returns 10.",
+  "code": "def sum_to(n):\n    total = 0\n    for i in range(1, n):\n        total += i\n    return total",
+  "bug_line": 3,
+  "reference_explanation": "range(1, n) stops at n - 1, so n itself is never added. sum_to(4) returns 6 instead of 10. Use range(1, n + 1).",
+  "hints": [
+    "Check which numbers the loop actually visits.",
+    "range(a, b) stops before b."
+  ],
+  "fixed_code": "def sum_to(n):\n    total = 0\n    for i in range(1, n + 1):\n        total += i\n    return total",
+  "tests": [
+    "assert sum_to(4) == 10",
+    "assert sum_to(1) == 1",
+    "assert sum_to(0) == 0",
+    "assert sum_to(10) == 55",
+    "assert sum_to(100) == 5050"
+  ],
+  "source": "original",
+  "source_url": null,
+  "license": "unknown",
+  "license_status": "unknown",
+  "commercial_ok": false,
+  "attribution_text": "Original puzzle by pestcontrol",
+  "retrieved_at": "2026-11-02",
+  "ai_style": false,
+  "verified": false
+}
