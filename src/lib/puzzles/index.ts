@@ -1,4 +1,4 @@
-import type { Puzzle } from "./types";
+import type { Difficulty, Puzzle, PuzzleView } from "./types";
 import { validatePuzzle } from "./validate";
 
 // To add a puzzle: add one import line and one entry in `rawPuzzles`.
@@ -34,4 +34,23 @@ export function visibleTests(p: Puzzle): string[] {
 // The rest run only when the player submits.
 export function hiddenTests(p: Puzzle): string[] {
   return p.tests.slice(2);
+}
+
+// Copies the 4 fields explicitly (no spread) so new Puzzle fields cannot leak to the browser.
+export function toPuzzleView(p: Puzzle): PuzzleView {
+  return {
+    title: p.title,
+    difficulty: p.difficulty,
+    intent: p.intent,
+    code: p.code,
+  };
+}
+
+const TIER_LABELS: Record<Difficulty, string> = {
+  easy: "Easy",
+  medium: "Medium",
+};
+
+export function tierLabel(d: Difficulty): string {
+  return TIER_LABELS[d];
 }
